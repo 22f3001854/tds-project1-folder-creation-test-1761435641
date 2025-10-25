@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Folder Creation Test - folder-creation-test-1761435641</title>
+  <!-- Bootstrap 5 CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      padding: 20px;
+    }
+    #foldersContainer {
+      margin-top: 20px;
+    }
+    .folder {
+      padding: 10px;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      background-color: #f8f9fa;
+    }
+    #statusMessage {
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center mb-4">Folder Creation Test</h1>
+    <p class="text-center mb-4">This web app creates a master folder with 10 unique subfolders starting with "A".</p>
+    <div class="d-flex justify-content-center mb-3">
+      <button id="generateBtn" class="btn btn-primary">Generate Folders</button>
+    </div>
+    <div id="statusMessage" class="text-center text-success"></div>
+    <div id="foldersContainer" class="mt-4"></div>
+  </div>
+
+  <!-- Bootstrap 5 JS Bundle CDN (includes Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const generateBtn = document.getElementById('generateBtn');
+      const foldersContainer = document.getElementById('foldersContainer');
+      const statusMessage = document.getElementById('statusMessage');
+
+      const masterFolderName = 'MasterFolder';
+
+      // Function to create folder structure in localStorage
+      function createFolderStructure() {
+        // Initialize master folder object
+        const folderStructure = {};
+
+        // Create master folder
+        folderStructure[masterFolderName] = {};
+
+        // Generate 10 unique folder names starting with 'A'
+        const folderNames = new Set();
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        // Generate unique folder names
+        while (folderNames.size < 10) {
+          const suffix = Math.floor(Math.random() * 9000) + 1000; // 4-digit number
+          const name = 'A' + suffix;
+          folderNames.add(name);
+        }
+
+        // Add subfolders to master folder
+        folderNames.forEach(name => {
+          folderStructure[masterFolderName][name] = {};
+        });
+
+        // Save to localStorage
+        localStorage.setItem('folderStructure', JSON.stringify(folderStructure));
+      }
+
+      // Function to load folder structure from localStorage
+      function loadFolderStructure() {
+        const data = localStorage.getItem('folderStructure');
+        if (data) {
+          try {
+            return JSON.parse(data);
+          } catch (e) {
+            return null;
+          }
+        }
+        return null;
+      }
+
+      // Function to check if structure exists and is correct
+      function checkFolderStructure() {
+        const structure = loadFolderStructure();
+        if (!structure || !structure[masterFolderName]) {
+          return false;
+        }
+        const subfolders = Object.keys(structure[masterFolderName]);
+        if (subfolders.length !== 10) {
+          return false;
+        }
+        // Check all start with 'A' and are unique
+        const allValid = subfolders.every(name => name.startsWith('A'));
+        const allUnique = new Set(subfolders).size === subfolders.length;
+        return allValid && allUnique;
+      }
+
+      // Function to display folders
+      function displayFolders() {
+        foldersContainer.innerHTML = '';
+        const structure = loadFolderStructure();
+        if (!structure || !structure[masterFolderName]) return;
+        const subfolders = Object.keys(structure[masterFolderName]);
+        subfolders.forEach(name => {
+          const folderDiv = document.createElement('div');
+          folderDiv.className = 'folder';
+          folderDiv.textContent = name;
+          foldersContainer.appendChild(folderDiv);
+        });
+      }
+
+      // Main function to handle folder creation and display
+      function handleFolders() {
+        statusMessage.textContent = '';
+        // Check existing structure
+        if (checkFolderStructure()) {
+          // Already created and valid
+          displayFolders();
+          statusMessage.textContent = 'Folders already exist and are valid.';
+        } else {
+          // Create new structure
+          createFolderStructure();
+          displayFolders();
+          statusMessage.textContent = 'Folders have been created successfully.';
+        }
+      }
+
+      // Attach event listener
+      generateBtn.addEventListener('click', () => {
+        handleFolders();
+      });
+
+      // On page load, check if structure exists and is valid
+      if (checkFolderStructure()) {
+        displayFolders();
+        statusMessage.textContent = 'Existing folders loaded.';
+      } else {
+        // No valid structure, ready for user to generate
+        statusMessage.textContent = 'Click "Generate Folders" to create the folder structure.';
+      }
+    });
+  </script>
+</body>
+</html>
